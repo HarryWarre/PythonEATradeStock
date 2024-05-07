@@ -61,7 +61,7 @@ class OrdersManager:
         # Mở file văn bản để đọc
         with open(file_path, 'r') as file:
             # Đọc từng dòng trong file
-            symbol = symbol.strip().split(': ')[1]
+            # symbol = symbol.strip().split(': ')[1]
             lines = file.readlines()
             
             # Duyệt qua từng dòng

@@ -42,9 +42,9 @@ class Strategy:
         # Duyệt qua từng mã cổ phiếu và kiểm tra cập nhật trailing stop loss
         for symbol in symbols:
             df = self.calculate_technical_indicators(symbol)  # Lấy DataFrame cho mã cổ phiếu hiện tại
-            self.check_and_update_trailing_stop_loss(df)
-
-    def check_and_update_trailing_stop_loss(self, df):
+            self.check_and_update_trailing_stop_loss(df, symbol)
+    
+    def check_and_update_trailing_stop_loss(self, df, _symbol):
         # Lấy ngày hiện tại
         current_date = datetime.now()
         # Lấy ngày 1 tuần trước
@@ -62,19 +62,19 @@ class Strategy:
             print('SL: ', stop_loss)
             if max_stop_loss is None or stop_loss > max_stop_loss:
                 max_stop_loss = stop_loss
-            print('Max sl: ', max_stop_loss)
         # Đọc file txt để kiểm tra các lệnh và cập nhật trailing stop loss
-        with open('orders.txt', 'r') as file:
-            lines = file.readlines()
-            for line in lines:
-                parts = line.split(',')
-                symbol = parts[0]
-                stop_loss_from_txt = round(float(parts[2].split(':')[1].strip()),2)
-                
-                # Kiểm tra nếu stop loss mới lớn hơn stop loss từ file
-                if max_stop_loss > stop_loss_from_txt:
-                    self.orders_manager.update_stop_loss(symbol, max_stop_loss, current_date)
-                    print(f"Đã cập nhật trailing stop loss cho {symbol} thành {max_stop_loss}")
+            with open('orders.txt', 'r') as file:
+                lines = file.readlines()
+                for line in lines:
+                    parts = line.split(',')
+                    symbol = parts[0].split(':')[-1].strip()
+                    if symbol == _symbol:  # Kiểm tra xem symbol của lệnh từ tệp có phù hợp không
+                        stop_loss_from_txt = round(float(parts[2].split(':')[1].strip()), 2)
+                        
+                        # Kiểm tra nếu stop loss mới lớn hơn stop loss từ file
+                        if max_stop_loss is not None and max_stop_loss > stop_loss_from_txt:
+                            self.orders_manager.update_stop_loss(_symbol, max_stop_loss, current_date)
+                            print(f"Đã cập nhật trailing stop loss cho {_symbol} thành {max_stop_loss}")
 
     def calculate_technical_indicators(self, in_symbol):
         # Lấy ngày hiện tại
@@ -124,7 +124,3 @@ class Strategy:
                     orders_manager.place_order(symbol, row['close'], round(stoploss_price), index)  # Đặt lệnh mua
 
         return list_signal
-
-
-strategy = Strategy()
-strategy.update_trailing_stop_loss()

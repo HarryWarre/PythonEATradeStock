@@ -18,8 +18,8 @@ class SystemController:
                 print(f"Lỗi xảy ra")
     # Run System
     def execute_trade_cycle (self): 
-        self.sort_buy()
-        # strategy.update_trailing_stop_loss()
+        # self.sort_buy()
+        strategy.update_trailing_stop_loss()
 
     #Print orders list:
     def print_order_info(self):
@@ -31,9 +31,3 @@ class SystemController:
                 buy_price = parts[1].split(': ')[1]
                 stop_loss = parts[2].split(': ')[1]
                 print(f"{index}. Symbol: {symbol} - Giá mở: {buy_price} - SL: {stop_loss}")
-    
-    
-
-system = SystemController()
-# system.execute_trade_cycle()
-system.execute_trade_cycle()
