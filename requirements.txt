@@ -1,5 +1,5 @@
 python-telegram-bot
 vnstock
 git+https://github.com/phamdinhkhanh/vnquant.git@a8272d36cb4368dc1cc85e3a79e270bfa8b09848
-TA-Lib
+TA-Lib @ https://github.com/mrjbq7/ta-lib/archive/refs/tags/0.4.0.tar.gz
 httpx
