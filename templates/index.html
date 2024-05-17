@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>DFF Forex Strategy</title>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    </head>
+    <body>
+        <h1>DFF Forex Strategy</h1>
+        <form id="prediction-form">
+            <label for="currency_pair">Select Currency Pair:</label>
+            <select id="currency_pair" name="currency_pair">
+                <option value="AUDUSD=X">AUDUSD=X</option>
+                <option value="CHFJPY=X">CHFJPY=X</option>
+                <option value="EURJPY=X">EURJPY=X</option>
+                <option value="EURUSD=X">EURUSD=X</option>
+                <option value="USDJPY=X">USDJPY=X</option>
+                <option value="GPBAUD=X">GPBAUD=X</option>
+                <option value="GBPJPY=X">GBPJPY=X</option>
+                <option value="GBPUSD=X">GBPUSD=X</option>
+                <option value="NZDUSD=X">NZDUSD=X</option>
+                <option value="USDCHF=X">USDCHF=X</option>
+                <option value="USDCAD=X">USDCAD=X</option>
+            </select>
+            <button type="submit">Load Data and Predict</button>
+        </form>
+        <div id="result"></div>
+        <div id="plot"></div>
+
+        <script>
+            $(document).ready(function () {
+                $("#prediction-form").on("submit", function (event) {
+                    event.preventDefault();
+                    $.ajax({
+                        url: "/predict",
+                        method: "POST",
+                        data: $(this).serialize(),
+                        success: function (response) {
+                            if (response.error) {
+                                $("#result").text("Error: " + response.error);
+                            } else {
+                                $("#result").text("Result: " + response.result);
+                                $("#plot").html(
+                                    '<img src="data:image/png;base64,' +
+                                        response.plot_url +
+                                        '">'
+                                );
+                            }
+                        },
+                    });
+                });
+            });
+        </script>
+    </body>
+</html>
