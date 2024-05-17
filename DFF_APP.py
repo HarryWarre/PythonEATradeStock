@@ -5,7 +5,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from tensorflow.keras.models import load_model
 from sklearn.preprocessing import StandardScaler
-import talib as ta
 from datetime import datetime, timedelta
 import io
 import base64
@@ -23,7 +22,7 @@ def predict():
         yesterday = datetime.now() - timedelta(1)
         yesterday_str = yesterday.strftime('%Y-%m-%d')
 
-        data = yf.download(selected_pair, start=yesterday_str, interval='30m')
+        data = yf.download(selected_pair, start=yesterday_str, interval='60m')
         data = data.dropna()
 
         model = load_model('dff_forex.h5')
@@ -34,8 +33,8 @@ def predict():
         loss = -delta.where(delta < 0, 0)
         data['AU'] = gain.rolling(window=14, min_periods=1).mean()
         data['AD'] = loss.rolling(window=14, min_periods=1).mean()
-        data['RSI'] = ta.RSI(data['Close'], timeperiod=14)
-        data['ERSI'] = ta.EMA(data['RSI'], timeperiod=14)
+        data['RSI'] = calculate_rsi(data)
+        data['ERSI'] = calculate_ersi(data['RSI'])
 
         scaler = StandardScaler()
         features = ['EMA', 'AU', 'AD']
@@ -101,5 +100,19 @@ def condition_buy(rsi, ersi, market_state):
 def condition_sell(rsi, ersi, market_state):
     return (rsi < ersi) and (market_state == 'Downtrend') and (ersi > 40 or ersi < 60)
 
+def calculate_rsi(data, window=14):
+    close = data['Close']
+    delta = close.diff()
+    gain = delta.where(delta > 0, 0)
+    loss = -delta.where(delta < 0, 0)
+    avg_gain = gain.rolling(window=window, min_periods=1).mean()
+    avg_loss = loss.rolling(window=window, min_periods=1).mean()
+    rs = avg_gain / avg_loss
+    rsi = 100 - (100 / (1 + rs))
+    return rsi
+
+def calculate_ersi(rsi, window=14):
+    ersi = rsi.ewm(span=window, min_periods=0, adjust=False).mean()
+    return ersi
 if __name__ == '__main__':
     app.run(debug=True)
