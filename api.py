@@ -28,4 +28,3 @@ def list_companies():
     symbols_hose = df[df['comGroupCode'] == 'HOSE']['ticker'].tolist()
 
     return symbols_hose
-
